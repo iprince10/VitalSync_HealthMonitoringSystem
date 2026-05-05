@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VitalSync — IoT Health Monitoring System</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ══════════════════════════ HERO ══════════════════════════ -->
+  <section class="hero">
+    <div class="container">
+
+      <div class="badge-row">
+        <span class="badge badge-blue">ESP32</span>
+        <span class="badge badge-yellow">IoT</span>
+        <span class="badge badge-dark">Health Monitor</span>
+        <span class="badge badge-dark">Arduino IoT Cloud</span>
+        <span class="badge badge-dark">Open Source</span>
+        <span class="badge badge-blue"><span class="live-dot"></span>Live Dashboard</span>
+      </div>
+
+      <div class="hero-tag">// IoT Health Monitoring System</div>
+
+      <h1>Vital<span class="accent">Sync</span></h1>
+
+      <div class="hero-sub">Real-time SPO₂ · Heart Rate · Temperature → Cloud</div>
+
+      <p class="hero-desc">
+        A wall-powered IoT health station built on ESP32 that measures blood oxygen saturation,
+        heart rate, and body temperature — displayed locally on an OLED and synchronized
+        live to Arduino IoT Cloud.
+      </p>
+
+      <div class="hero-links">
+        <a href="https://github.com/iprince10/VitalSync_HealthMonitoringSystem" class="btn btn-primary">
+          View on GitHub
+        </a>
+        <a href="https://create.arduino.cc/iot" class="btn btn-secondary">
+          Arduino IoT Cloud ↗
+        </a>
+      </div>
+
+      <div class="repo-bar">
+        <div class="repo-stat">Language <span>C++ / Arduino</span></div>
+        <div class="repo-stat">Platform <span>ESP32</span></div>
+        <div class="repo-stat">License <span>MIT</span></div>
+        <div class="repo-stat">Cloud <span>Arduino IoT</span></div>
+        <div class="repo-stat">Author <span>Prince Jha</span></div>
+      </div>
+
+      <!-- VITAL READOUT STRIP -->
+      <div class="vitals-strip">
+        <div class="vital-card vc-red">
+          <div class="vital-icon">♥</div>
+          <div class="vital-label">Heart Rate</div>
+          <div class="vital-value" id="bpm-val">72</div>
+          <div class="vital-unit">BPM</div>
+        </div>
+        <div class="vital-card vc-blue">
+          <div class="vital-icon">◎</div>
+          <div class="vital-label">Blood Oxygen</div>
+          <div class="vital-value" id="spo2-val">98</div>
+          <div class="vital-unit">SpO₂ %</div>
+        </div>
+        <div class="vital-card vc-yellow">
+          <div class="vital-icon">⊕</div>
+          <div class="vital-label">Temperature</div>
+          <div class="vital-value" id="temp-val">98.4</div>
+          <div class="vital-unit">°F</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ FEATURES ══════════════════════════ -->
+  <section>
+    <div class="container">
+      <div class="section-label">// 01 — Features</div>
+      <h2>What VitalSync Does</h2>
+
+      <div class="feat-grid">
+        <div class="feat-item">
+          <div class="feat-dot fd-blue"></div>
+          <div class="feat-title">Real-Time Heart Rate</div>
+          <div class="feat-text">Custom peak-detection algorithm using exponential moving average baseline. Accurate on
+            low-amplitude PPG signals where standard libraries fail.</div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot fd-yellow"></div>
+          <div class="feat-title">SpO₂ Measurement</div>
+          <div class="feat-text">Maxim's official ratio-of-ratios SpO₂ algorithm over 100-sample rolling buffer with
+            real-time validation.</div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot fd-blue"></div>
+          <div class="feat-title">Body Temperature</div>
+          <div class="feat-text">DS18B20 non-blocking temperature read every 3s. Displays simultaneously in °F and °C
+            with clinical status text.</div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot fd-dark"></div>
+          <div class="feat-title">OLED Display</div>
+          <div class="feat-text">Two auto-rotating pages every 4 seconds. Page 1: BPM + SpO₂ with live waveform. Page 2:
+            Temperature in both units.</div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot fd-blue"></div>
+          <div class="feat-title">Arduino IoT Cloud</div>
+          <div class="feat-text">4 variables pushed via MQTT/TLS every 5 seconds. Throttled cloud polling (100ms)
+            prevents sensor loop interference.</div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot fd-yellow"></div>
+          <div class="feat-title">Wall-Powered Hardware</div>
+          <div class="feat-text">12V DC → LM2596 Buck → 5V → AMS1117 → 3.3V. Clean regulated power for all components on
+            a 6×4 perfboard.</div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot fd-blue"></div>
+          <div class="feat-title">Non-Blocking Architecture</div>
+          <div class="feat-text">Zero delay() calls. All timing via millis() timers. MAX30102 FIFO serviced every loop
+            iteration without stalls.</div>
+        </div>
+        <div class="feat-item">
+          <div class="feat-dot fd-dark"></div>
+          <div class="feat-title">Mobile App Ready</div>
+          <div class="feat-text">Live sensor data accessible from anywhere via the Arduino IoT Cloud mobile app — no
+            server setup required.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ HARDWARE ══════════════════════════ -->
+  <section>
+    <div class="container">
+      <div class="section-label">// 02 — Hardware</div>
+      <h2>Components</h2>
+
+      <div class="hw-grid">
+        <div class="hw-card">
+          <div class="hw-num">Component 01</div>
+          <div class="hw-name">ESP32 Dev Module</div>
+          <div class="hw-role">Main Microcontroller</div>
+          <div class="hw-desc">Dual-core 240MHz Xtensa LX6. Built-in WiFi 802.11 b/g/n + Bluetooth. 12-bit ADC, hardware
+            I2C/SPI. 3.3V logic.</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">Component 02</div>
+          <div class="hw-name">MAX30102 (Black PCB)</div>
+          <div class="hw-role">Pulse Oximeter + Heart Rate</div>
+          <div class="hw-desc">Integrated red (660nm) + IR (880nm) LED with photodetector. 18-bit ADC. I2C address 0x57.
+            PPG-based SpO₂ and BPM.</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">Component 03</div>
+          <div class="hw-name">DS18B20 (Black Wire)</div>
+          <div class="hw-role">Digital Temperature Sensor</div>
+          <div class="hw-desc">Silicon bandgap thermometer. ±0.5°C accuracy. 11-bit resolution (0.125°C). 1-Wire
+            protocol. −55°C to +125°C range.</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">Component 04</div>
+          <div class="hw-name">SSD1306 OLED 0.96"</div>
+          <div class="hw-role">Local Display</div>
+          <div class="hw-desc">128×64 pixel OLED. No backlight needed — each pixel self-illuminates. I2C address 0x3C.
+            High contrast, low power.</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">Component 05</div>
+          <div class="hw-name">LM2596 Buck Converter</div>
+          <div class="hw-role">12V → 5V Step-Down</div>
+          <div class="hw-desc">Switching DC-DC converter. 75–90% efficiency. Handles up to 3A. Eliminates heat
+            dissipation of a direct linear drop.</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">Component 06</div>
+          <div class="hw-name">AMS1117 3.3V LDO</div>
+          <div class="hw-role">5V → 3.3V Regulator</div>
+          <div class="hw-desc">Low dropout linear regulator. Provides clean 3.3V for ESP32, OLED, MAX30102, and DS18B20
+            from the buck's 5V rail.</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">Component 07</div>
+          <div class="hw-name">4.7kΩ Resistor (¼W)</div>
+          <div class="hw-role">1-Wire Pull-up</div>
+          <div class="hw-desc">Mandatory pull-up for DS18B20 1-Wire data line. Provides high logic level on open-drain
+            bus. Between DATA and 3.3V.</div>
+        </div>
+        <div class="hw-card">
+          <div class="hw-num">Component 08</div>
+          <div class="hw-name">6×4 Perfboard</div>
+          <div class="hw-role">Custom PCB Assembly</div>
+          <div class="hw-desc">Single-sided brown perfboard. All components soldered point-to-point. Compact and
+            permanent assembly without a PCB fab.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ PINOUT ══════════════════════════ -->
+  <section>
+    <div class="container">
+      <div class="section-label">// 03 — Wiring</div>
+      <h2>Pin Connections</h2>
+
+      <table class="pin-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Signal</th>
+            <th>ESP32 Pin</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="pin-sensor">MAX30102</td>
+            <td>SDA</td>
+            <td class="pin-gpio">GPIO 21</td>
+            <td>Shared I2C bus</td>
+          </tr>
+          <tr>
+            <td class="pin-sensor">MAX30102</td>
+            <td>SCL</td>
+            <td class="pin-gpio">GPIO 22</td>
+            <td>Shared I2C bus</td>
+          </tr>
+          <tr>
+            <td class="pin-sensor">MAX30102</td>
+            <td>VIN</td>
+            <td class="pin-power">3.3V</td>
+            <td>From AMS1117</td>
+          </tr>
+          <tr>
+            <td class="pin-sensor">OLED SSD1306</td>
+            <td>SDA</td>
+            <td class="pin-gpio">GPIO 21</td>
+            <td>Shared I2C bus (addr 0x3C)</td>
+          </tr>
+          <tr>
+            <td class="pin-sensor">OLED SSD1306</td>
+            <td>SCL</td>
+            <td class="pin-gpio">GPIO 22</td>
+            <td>Shared I2C bus</td>
+          </tr>
+          <tr>
+            <td class="pin-sensor">OLED SSD1306</td>
+            <td>VCC</td>
+            <td class="pin-power">3.3V</td>
+            <td>From AMS1117</td>
+          </tr>
+          <tr>
+            <td class="pin-sensor">DS18B20</td>
+            <td>DATA</td>
+            <td class="pin-gpio">GPIO 4</td>
+            <td>4.7kΩ pull-up to 3.3V</td>
+          </tr>
+          <tr>
+            <td class="pin-sensor">DS18B20</td>
+            <td>VCC</td>
+            <td class="pin-power">3.3V</td>
+            <td>From AMS1117</td>
+          </tr>
+          <tr>
+            <td class="pin-sensor">All GND</td>
+            <td>GND</td>
+            <td class="pin-power">GND</td>
+            <td>Common ground rail</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ PROTOCOLS ══════════════════════════ -->
+  <section>
+    <div class="container">
+      <div class="section-label">// 04 — Communication Protocols</div>
+      <h2>How Components Talk</h2>
+
+      <div class="proto-grid">
+        <div class="proto-card proto-i2c">
+          <div class="proto-tag">I²C</div>
+          <div class="proto-title">Inter-Integrated Circuit</div>
+          <div class="proto-detail">Used by MAX30102 (0x57) and OLED (0x3C) on the same 2-wire bus. SDA = GPIO 21, SCL =
+            GPIO 22. Running at 400kHz Fast Mode. Master (ESP32) initiates all transfers. Open-drain with pull-ups.
+          </div>
+        </div>
+        <div class="proto-card proto-1wire">
+          <div class="proto-tag">1-Wire</div>
+          <div class="proto-title">Dallas 1-Wire</div>
+          <div class="proto-detail">Used by DS18B20 on GPIO 4 with 4.7kΩ pull-up. Single bidirectional data line. Each
+            DS18B20 has a unique 64-bit ROM address. Non-blocking mode: requestTemperatures() then read 3s later.</div>
+        </div>
+        <div class="proto-card proto-mqtt">
+          <div class="proto-tag">MQTT / TLS</div>
+          <div class="proto-title">Message Queue Telemetry Transport</div>
+          <div class="proto-detail">Publish-subscribe IoT protocol over TCP/IP port 8884. Broker: iot.arduino.cc. TLS
+            encrypted. Persistent connection. 4 variables published ON_CHANGE, polled every 100ms to avoid blocking.
+          </div>
+        </div>
+        <div class="proto-card proto-wifi">
+          <div class="proto-tag">WiFi 802.11</div>
+          <div class="proto-title">Wireless LAN</div>
+          <div class="proto-detail">ESP32 connects to 2.4GHz hotspot. ConnectionHandler manages automatic reconnection.
+            NTP (time.google.com) synchronizes clock required for Arduino IoT Cloud TLS authentication.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ ARCHITECTURE ══════════════════════════ -->
+  <section>
+    <div class="container">
+      <div class="section-label">// 05 — Architecture</div>
+      <h2>System Data Flow</h2>
+
+      <div class="arch-diagram">
+        <div class="arch-row">
+          <span class="arch-node an-yellow">MAX30102</span>
+          <span class="arch-arrow">──I²C──▶</span>
+          <span class="arch-node an-dim">ESP32</span>
+          <span class="arch-arrow">──▶</span>
+          <span class="arch-node an-dim">Peak Detector</span>
+          <span class="arch-arrow">──▶</span>
+          <span class="arch-node an-blue">BPM</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-node an-yellow">MAX30102</span>
+          <span class="arch-arrow">──I²C──▶</span>
+          <span class="arch-node an-dim">ESP32</span>
+          <span class="arch-arrow">──▶</span>
+          <span class="arch-node an-dim">SpO₂ Algorithm</span>
+          <span class="arch-arrow">──▶</span>
+          <span class="arch-node an-blue">SpO₂%</span>
+        </div>
+        <div class="arch-row">
+          <span class="arch-node an-yellow">DS18B20</span>
+          <span class="arch-arrow">──1W──▶</span>
+          <span class="arch-node an-dim">ESP32</span>
+          <span class="arch-arrow">──▶</span>
+          <span class="arch-node an-dim">F = C×9/5+32</span>
+          <span class="arch-arrow">──▶</span>
+          <span class="arch-node an-blue">°F / °C</span>
+        </div>
+        <div class="arch-row arch-row-final">
+          <span class="arch-node an-dim">BPM + SpO₂ + Temp</span>
+          <span class="arch-arrow">──▶</span>
+          <span class="arch-node an-blue">OLED Display</span>
+          <span class="arch-arrow">&amp;</span>
+          <span class="arch-node an-dim">WiFi → MQTT →</span>
+          <span class="arch-node an-blue">Arduino IoT Cloud</span>
+        </div>
+      </div>
+
+      <h3>Non-Blocking Loop Architecture</h3>
+      <div class="code-block">
+        <span class="code-comment">// Loop runs at full speed — no delay() anywhere</span>
+        <span class="code-key">void</span> loop() {
+        <span class="code-comment">// Cloud poll — throttled to 100ms</span>
+        <span class="code-key">if</span> (now - lastCloudPoll &gt;= <span class="code-val">100</span>)
+        ArduinoCloud.update();
+
+        <span class="code-comment">// DS18B20 — every 3000ms, non-blocking</span>
+        <span class="code-key">if</span> (now - lastTempRead &gt;= <span class="code-val">3000</span>)
+        readTemperature();
+
+        <span class="code-comment">// MAX30102 — service FIFO every iteration</span>
+        <span class="code-key">while</span> (!particleSensor.available()) particleSensor.check();
+        irVal = particleSensor.getIR();
+        redVal = particleSensor.getRed();
+        particleSensor.nextSample();
+
+        <span class="code-comment">// Custom peak detector → BPM</span>
+        detectBeat(irVal);
+
+        <span class="code-comment">// SpO2 buffer → recalculate at 100 samples</span>
+        accumulateSpO2(irVal, redVal);
+
+        <span class="code-comment">// OLED refresh — every 150ms</span>
+        <span class="code-key">if</span> (now - lastDisplay &gt;= <span class="code-val">150</span>) updateDisplay();
+
+        <span class="code-comment">// Cloud push — every 5000ms</span>
+        <span class="code-key">if</span> (now - lastCloudUpd &gt;= <span class="code-val">5000</span>) pushToCloud();
+        }
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ CLOUD ══════════════════════════ -->
+  <section>
+    <div class="container">
+      <div class="section-label">// 06 — Cloud</div>
+      <h2>Arduino IoT Cloud Variables</h2>
+      <p>Define these four variables in your Thing on <a href="https://create.arduino.cc/iot"
+          class="link">create.arduino.cc/iot</a> before uploading.</p>
+
+      <div class="cloud-vars">
+        <div class="cloud-var">
+          <div class="cv-name">heartRate</div>
+          <div class="cv-type">int</div>
+          <div class="cv-policy">READ · ON_CHANGE</div>
+        </div>
+        <div class="cloud-var">
+          <div class="cv-name">spo2Level</div>
+          <div class="cv-type">int</div>
+          <div class="cv-policy">READ · ON_CHANGE</div>
+        </div>
+        <div class="cloud-var">
+          <div class="cv-name">temperatureF</div>
+          <div class="cv-type">float</div>
+          <div class="cv-policy">READ · ON_CHANGE</div>
+        </div>
+        <div class="cloud-var">
+          <div class="cv-name">temperatureC</div>
+          <div class="cv-type">float</div>
+          <div class="cv-policy">READ · ON_CHANGE</div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <span class="code-comment">// thingProperties.h — fill in your credentials</span>
+        <span class="code-key">const char</span> DEVICE_LOGIN_NAME[] = <span class="code-str">"YOUR_DEVICE_ID"</span>;
+        <span class="code-key">const char</span> SSID[] = <span class="code-str">"YOUR_WIFI_SSID"</span>;
+        <span class="code-key">const char</span> PASS[] = <span class="code-str">"YOUR_WIFI_PASSWORD"</span>;
+        <span class="code-key">const char</span> DEVICE_KEY[] = <span class="code-str">"YOUR_SECRET_KEY"</span>;
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ INSTALL ══════════════════════════ -->
+  <section>
+    <div class="container">
+      <div class="section-label">// 07 — Installation</div>
+      <h2>Getting Started</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-content">
+            <h4>Clone the Repository</h4>
+            <p><span class="inline-code">git clone
+                https://github.com/iprince10/VitalSync_HealthMonitoringSystem.git</span> and open the <span
+                class="inline-code">.ino</span> file in Arduino IDE.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-content">
+            <h4>Install ESP32 Board Package</h4>
+            <p>In Arduino IDE → Board Manager → search <span class="inline-code">esp32</span> by Espressif → Install.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-content">
+            <h4>Install Required Libraries</h4>
+            <p>Via Library Manager install: <span class="inline-code">SparkFun MAX3010x</span>, <span
+                class="inline-code">DallasTemperature</span>, <span class="inline-code">OneWire</span>, <span
+                class="inline-code">Adafruit SSD1306</span>, <span class="inline-code">Adafruit GFX</span>, <span
+                class="inline-code">ArduinoIoTCloud</span>, <span class="inline-code">Arduino_ConnectionHandler</span>.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-content">
+            <h4>Create Arduino IoT Cloud Thing</h4>
+            <p>Go to <a href="https://create.arduino.cc/iot" class="link">create.arduino.cc/iot</a>, create a Thing
+              named <span class="inline-code">HealthMonitor</span>, add the 4 cloud variables above, register an ESP32
+              device, and save the Device ID + Secret Key.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-content">
+            <h4>Configure Credentials</h4>
+            <p>Edit <span class="inline-code">thingProperties.h</span> — fill in your Device ID, Secret Key, WiFi SSID,
+              and WiFi password. Never commit this file publicly.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num"></div>
+          <div class="step-content">
+            <h4>Upload and Monitor</h4>
+            <p>Select board <span class="inline-code">ESP32 Dev Module</span>, select your COM port, upload. Open Serial
+              Monitor at 115200 baud to observe connection logs and sensor values.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ AUTHOR ══════════════════════════ -->
+  <section>
+    <div class="container">
+      <div class="section-label">// 08 — Author</div>
+      <h2>Built By</h2>
+
+      <div class="author-card">
+        <div class="author-avatar">PJ</div>
+        <div>
+          <div class="author-name">Prince Jha</div>
+          <div class="author-detail">
+            B.Tech Electronics &amp; Communication Engineering — Jamia Hamdard, New Delhi<br>
+            Aspiring Embedded Engineer<br><br>
+            GitHub: <a href="https://github.com/iprince10" class="link">github.com/iprince10</a> &nbsp;·&nbsp;
+            Project: <a href="https://github.com/iprince10/VitalSync_HealthMonitoringSystem" class="link">VitalSync
+              Repository</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════ FOOTER ══════════════════════════ -->
+  <footer>
+    <div class="container">
+      <div class="divider"></div>
+      <div class="footer-brand">Vital<span>Sync</span></div>
+      <div class="footer-copy">
+        MIT License · Built with ESP32, MAX30102, DS18B20, SSD1306 &amp; Arduino IoT Cloud<br>
+        <a href="https://github.com/iprince10/VitalSync_HealthMonitoringSystem"
+          class="link">github.com/iprince10/VitalSync_HealthMonitoringSystem</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
