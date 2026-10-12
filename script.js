@@ -22,9 +22,35 @@ animateValue("bpm-val", 65, 85, 2000);
 animateValue("spo2-val", 95, 100, 2500);
 
 setInterval(() => {
+  const tempValue = document.getElementById("temp-val");
+  if (!tempValue) return;
   const temp = (97 + Math.random() * 2).toFixed(1);
-  document.getElementById("temp-val").innerText = temp;
+  tempValue.innerText = temp;
 }, 3000);
+
+// Keep the compact header out of the way while scrolling down.
+const siteHeader = document.querySelector(".site-header");
+let previousScrollY = window.scrollY;
+let scrollUpdatePending = false;
+
+window.addEventListener("scroll", () => {
+  if (!siteHeader || scrollUpdatePending) return;
+
+  scrollUpdatePending = true;
+  window.requestAnimationFrame(() => {
+    const currentScrollY = window.scrollY;
+    const scrollDelta = currentScrollY - previousScrollY;
+
+    if (currentScrollY < 80 || scrollDelta < -6) {
+      siteHeader.classList.remove("header-hidden");
+    } else if (scrollDelta > 6 && currentScrollY > 120) {
+      siteHeader.classList.add("header-hidden");
+    }
+
+    previousScrollY = currentScrollY;
+    scrollUpdatePending = false;
+  });
+}, { passive: true });
 
 // ===== SCROLL FADE-IN =====
 const observer = new IntersectionObserver(entries => {
